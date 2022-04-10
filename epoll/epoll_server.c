@@ -10,7 +10,6 @@
 #define PORT 8081
 #define BACKLOG 1024
 #define MAX_EVENTS 12
-#define DEFAULT_TIMEOUT 100 /* millisecond */
 #define BUF_SIZE 1024
 
 int process(int conn, char *buf) {
