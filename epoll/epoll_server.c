@@ -13,11 +13,15 @@
 #define DEFAULT_TIMEOUT 100 /* millisecond */
 #define BUF_SIZE 1024
 
-void process(int conn, char *buf) {
+int process(int conn, char *buf) {
     bzero(buf, sizeof(buf));
     read(conn, buf, sizeof(buf));
+    if(!strncmp(buf, "exit\n", sizeof(buf))) {
+        return -1;
+    }
     printf("%s", buf);
     write(conn, buf, strlen(buf));
+    return 0;
 }
 
 int main() {
@@ -29,6 +33,7 @@ int main() {
     struct epoll_event ee;
     int stop = 0;
     int conn;
+    int res;
 
     char buf[BUF_SIZE];
 
@@ -107,11 +112,17 @@ int main() {
                     break;
                 }
             } else if(e->events & EPOLLIN) {
-                process(e->data.fd, buf);
+                res = process(e->data.fd, buf);
+                if(res == -1) {
+                    sprintf(buf, "bye\n");
+                    write(conn, buf, strlen(buf));
+                    epoll_ctl(epfd, EPOLL_CTL_DEL, e->data.fd, NULL);
+                    close(e->data.fd);
+                }
+
             } else if(e->events & (EPOLLRDHUP | EPOLLHUP)) {
                 epoll_ctl(epfd, EPOLL_CTL_DEL, e->data.fd, NULL);
                 close(e->data.fd);
-                continue;
             }
         }
     }
