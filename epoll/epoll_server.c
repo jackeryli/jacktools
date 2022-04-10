@@ -62,7 +62,7 @@ int main() {
 
     printf("Listen Socket\n");
 
-    epfd = epoll_create(1024);
+    epfd = epoll_create(1024); /* 1024 doesn't matter */
     if(epfd == -1) {
         perror("epoll_create");
         exit(1);
@@ -97,6 +97,7 @@ int main() {
                 socklen_t client_len;
                 client_len = sizeof(client);
 
+                /* Or you can use fnctl */
                 conn = accept4(fd, &client, (struct sockaddr*)&client_len, SOCK_NONBLOCK | SOCK_CLOEXEC);
                 if(conn == -1) {
                     perror("Accept socket error\n");
